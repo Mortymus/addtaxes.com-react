@@ -1,18 +1,40 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Province } from './types';
+import { provinces } from './provinces';
 import ProvinceDisplay from './components/ProvinceDisplay';
 import ProvinceDropDown from './components/ProvinceDropDown';
 import TaxCalculator from './components/TaxCalculator';
 import ShareLinks from './components/ShareLinks';
 import './App.css';
 
+const provinceCookieName = 'selectedProvince';
+
+function getSavedProvince(): Province {
+  const cookie = document.cookie
+    .split(';')
+    .map((item) => item.trim())
+    .find((item) => item.startsWith(`${provinceCookieName}=`));
+  const savedName = cookie?.slice(provinceCookieName.length + 1);
+
+  if (!savedName) {
+    return provinces[0];
+  }
+
+  try {
+    const provinceName = decodeURIComponent(savedName);
+    return provinces.find((province) => province.provinceName === provinceName) ?? provinces[0];
+  } catch {
+    return provinces[0];
+  }
+}
+
 function App() {
-  const [ province, setProvince ] = useState<Province>({
-    provinceName: "Alberta",
-    gst: 5,
-    pst: 0,
-    hst: 0
-  });
+  const [ province, setProvince ] = useState<Province>(getSavedProvince);
+
+  useEffect(() => {
+    const secureAttribute = window.location.protocol === 'https:' ? '; Secure' : '';
+    document.cookie = `${provinceCookieName}=${encodeURIComponent(province.provinceName)}; max-age=31536000; path=/; SameSite=Lax${secureAttribute}`;
+  }, [province]);
 
   return (
     <div className="app-shell min-vh-100">

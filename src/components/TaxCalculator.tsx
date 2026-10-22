@@ -240,13 +240,7 @@ function TaxCalculator({ province }: Props) {
                             <div>
                                 <p className="eyebrow mb-1">YOUR BREAKDOWN</p>
                                 <h3 className="calculator-result__title mb-0">Estimated amounts</h3>
-                            </div>
-                            {currentResult.calculationMode !== null && (
-                                <div className="calculator-result__share">
-                                    <span>Tax portion</span>
-                                    <strong>{currentResult.taxShare.toFixed(2)}%</strong>
-                                </div>
-                            )}
+                            </div>                          
                         </div>
 
                         <div className="calculator-result__rows">
