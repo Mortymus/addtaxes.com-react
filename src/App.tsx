@@ -3,6 +3,7 @@ import type { Province } from './types';
 import ProvinceDisplay from './components/ProvinceDisplay';
 import ProvinceDropDown from './components/ProvinceDropDown';
 import TaxCalculator from './components/TaxCalculator';
+import ShareLinks from './components/ShareLinks';
 import './App.css';
 
 function App() {
@@ -33,11 +34,11 @@ function App() {
           <div className="col-lg-8">
             <p className="eyebrow mb-3">CLEAR RATES. CONFIDENT DECISIONS.</p>
             <h1 className="hero-title mb-3">
-              Canadian sales tax,
+              Canadian sales tax calculator,
               <span className="d-block hero-title-accent">without the guesswork.</span>
             </h1>
             <p className="hero-copy mb-0">
-              Find the current GST, PST and HST rates for every province and territory.
+              Look up GST, PST and HST by province, calculate tax on an amount, or estimate a tip.
             </p>
           </div>
           <div className="col-lg-4">
@@ -97,6 +98,47 @@ function App() {
         </section>
 
         <TaxCalculator province={province} />
+
+        <section className="seo-content" aria-labelledby="sales-tax-guide-title">
+          <p className="eyebrow mb-2">A SIMPLE CANADIAN TAX GUIDE</p>
+          <h2 className="section-title mb-3" id="sales-tax-guide-title">
+            GST, PST and HST calculator by province
+          </h2>
+          <p>
+            Canadian sales tax depends on where a purchase is made. Use the province and
+            territory selector to see the applicable goods and services tax (GST),
+            provincial sales tax (PST), or harmonized sales tax (HST), and the combined rate.
+          </p>
+          <div className="row g-4">
+            <div className="col-md-4">
+              <h3>Calculate tax on an amount</h3>
+              <p>
+                Enter a pre-tax price and add the selected region’s sales taxes to estimate
+                the total cost.
+              </p>
+            </div>
+            <div className="col-md-4">
+              <h3>Remove tax from a total</h3>
+              <p>
+                If a price already includes sales tax, calculate the pre-tax amount and
+                identify the included tax portion.
+              </p>
+            </div>
+            <div className="col-md-4">
+              <h3>Estimate a tip</h3>
+              <p>
+                Choose a tip percentage from 5% or use another quick option. The calculator
+                shows the tip separately and adds it to the amount due.
+              </p>
+            </div>
+          </div>
+          <p className="seo-content__note mb-0">
+            This calculator provides estimates for convenience. Confirm applicable rates
+            with the relevant tax authority for official or tax-filing purposes.
+          </p>
+        </section>
+
+        <ShareLinks />
 
         <footer className="page-footer d-flex flex-column flex-sm-row justify-content-between gap-2">
           <span>Made for clarity.</span>
