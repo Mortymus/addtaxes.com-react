@@ -10,6 +10,7 @@ interface Props {
 
 interface CalculationResult {
     provinceName: string;
+    calculationMode: CalculationMode | null;
     baseAmount: number;
     gstAmount: number;
     pstAmount: number;
@@ -22,7 +23,7 @@ interface CalculationResult {
     taxShare: number;
 }
 
-const tipRates = [0, 5, 10, 15, 18, 20, 25];
+const tipRates = [0, 5, 10, 15, 20, 25, 30];
 
 const currencyFormatter = new Intl.NumberFormat('en-CA', {
     style: 'currency',
@@ -36,43 +37,57 @@ function formatCurrency(amount: number): string {
 function TaxCalculator({ province }: Props) {
     const [amount, setAmount] = useState('');
     const [tipRate, setTipRate] = useState(0);
+    const [calculationMode, setCalculationMode] = useState<CalculationMode | null>(null);
     const [result, setResult] = useState<CalculationResult | null>(null);
     const [error, setError] = useState('');
 
-    const calculate = (mode: CalculationMode) => {
-        const enteredAmount = Number(amount);
+    const calculate = (
+        mode: CalculationMode | null,
+        selectedTipRate = tipRate,
+        requirePositiveBase = false,
+    ): boolean => {
+        const normalizedAmount = amount.trim().replace(',', '.');
+        const enteredAmount = Number(normalizedAmount);
 
-        if (amount.trim() === '' || !Number.isFinite(enteredAmount) || enteredAmount < 0) {
+        if (normalizedAmount === '' || !Number.isFinite(enteredAmount) || enteredAmount < 0) {
             setResult(null);
             setError('Enter a valid amount of zero or more.');
-            return;
+            return false;
         }
 
         const combinedRate = province.gst + province.pst + province.hst;
-        const baseAmount = mode === 'add'
+        const baseAmount = mode === null || mode === 'add'
             ? enteredAmount
             : enteredAmount / (1 + combinedRate / 100);
-        const gstAmount = baseAmount * province.gst / 100;
-        const pstAmount = baseAmount * province.pst / 100;
-        const hstAmount = baseAmount * province.hst / 100;
+        const gstAmount = mode === null ? 0 : baseAmount * province.gst / 100;
+        const pstAmount = mode === null ? 0 : baseAmount * province.pst / 100;
+        const hstAmount = mode === null ? 0 : baseAmount * province.hst / 100;
         const taxAmount = gstAmount + pstAmount + hstAmount;
         const totalAmount = mode === 'add' ? baseAmount + taxAmount : enteredAmount;
-        const tipAmount = baseAmount * tipRate / 100;
+        if ((requirePositiveBase || mode !== null) && baseAmount <= 0) {
+            setResult(null);
+            setError('Enter an amount greater than zero.');
+            return false;
+        }
+        const tipBaseAmount = mode === 'deduct' ? baseAmount : totalAmount;
+        const tipAmount = tipBaseAmount * selectedTipRate / 100;
 
         setResult({
             provinceName: province.provinceName,
+            calculationMode: mode,
             baseAmount,
             gstAmount,
             pstAmount,
             hstAmount,
             taxAmount,
             totalAmount,
-            tipRate,
+            tipRate: selectedTipRate,
             tipAmount,
             amountDue: totalAmount + tipAmount,
             taxShare: totalAmount === 0 ? 0 : taxAmount / totalAmount * 100,
         });
         setError('');
+        return true;
     };
 
     const currentResult = result?.provinceName === province.provinceName ? result : null;
@@ -80,7 +95,7 @@ function TaxCalculator({ province }: Props) {
         { label: 'GST', amount: currentResult?.gstAmount ?? 0, rate: province.gst },
         { label: 'PST', amount: currentResult?.pstAmount ?? 0, rate: province.pst },
         { label: 'HST', amount: currentResult?.hstAmount ?? 0, rate: province.hst },
-    ].filter((tax) => tax.rate > 0);
+    ].filter((tax) => currentResult?.calculationMode !== null && tax.rate > 0);
 
     return (
         <section className="calculator-card card border-0" aria-labelledby="calculator-title">
@@ -99,7 +114,9 @@ function TaxCalculator({ province }: Props) {
                     className="calculator-form"
                     onSubmit={(event: FormEvent<HTMLFormElement>) => {
                         event.preventDefault();
-                        calculate('add');
+                        if (calculate('add')) {
+                            setCalculationMode('add');
+                        }
                     }}
                     noValidate
                 >
@@ -113,20 +130,33 @@ function TaxCalculator({ province }: Props) {
                                 <input
                                     id="calculator-amount"
                                     className="form-control"
-                                    type="number"
-                                    min="0"
-                                    step="0.01"
+                                    type="text"
                                     inputMode="decimal"
                                     placeholder="0.00"
                                     value={amount}
                                     onChange={(event) => {
                                         setAmount(event.currentTarget.value);
+                                        setCalculationMode(null);
                                         setResult(null);
                                         setError('');
                                     }}
                                     aria-describedby={error ? 'calculator-error' : 'calculator-hint'}
                                     aria-invalid={Boolean(error)}
                                 />
+                                <button
+                                    className="input-group-text calculator-clear"
+                                    type="button"
+                                    onClick={() => {
+                                        setAmount('');
+                                        setTipRate(0);
+                                        setCalculationMode(null);
+                                        setResult(null);
+                                        setError('');
+                                    }}
+                                    aria-label="Clear amount"
+                                >
+                                    Clear
+                                </button>
                                 <span className="input-group-text">CAD</span>
                             </div>
                             {error ? (
@@ -135,29 +165,40 @@ function TaxCalculator({ province }: Props) {
                                 </div>
                             ) : (
                                 <div className="calculator-hint" id="calculator-hint">
-                                    Choose how you’d like to apply the selected region’s taxes.
+                                    PLease enter an amount and choose how you’d like to apply taxes.
                                 </div>
                             )}
                         </div>
 
                         <div className="calculator-actions" aria-label="Calculation options">
                             <button
-                                className="btn calculator-button calculator-button--primary"
+                                className={`btn calculator-button calculator-button--primary${calculationMode === 'add' ? ' calculator-button--selected' : ''}`}
                                 type="submit"
+                                aria-pressed={calculationMode === 'add'}
                             >
                                 Add taxes
                             </button>
                             <button
-                                className="btn calculator-button calculator-button--secondary"
+                                className={`btn calculator-button calculator-button--secondary${calculationMode === 'deduct' ? ' calculator-button--selected' : ''}`}
                                 type="button"
-                                onClick={() => calculate('deduct')}
+                                aria-pressed={calculationMode === 'deduct'}
+                                onClick={() => {
+                                    if (calculate('deduct')) {
+                                        setCalculationMode('deduct');
+                                    }
+                                }}
                             >
                                 Deduct included taxes
                             </button>
                             <button
-                                className="btn calculator-button calculator-button--secondary"
+                                className={`btn calculator-button calculator-button--secondary${calculationMode === 'portion' ? ' calculator-button--selected' : ''}`}
                                 type="button"
-                                onClick={() => calculate('portion')}
+                                aria-pressed={calculationMode === 'portion'}
+                                onClick={() => {
+                                    if (calculate('portion')) {
+                                        setCalculationMode('portion');
+                                    }
+                                }}
                             >
                                 Calculate tax portion
                             </button>
@@ -175,8 +216,12 @@ function TaxCalculator({ province }: Props) {
                                     aria-pressed={tipRate === rate}
                                     onClick={() => {
                                         setTipRate(rate);
-                                        setResult(null);
-                                        setError('');
+                                        if (amount.trim() === '') {
+                                            setResult(null);
+                                            setError('');
+                                            return;
+                                        }
+                                        calculate(calculationMode, rate, true);
                                     }}
                                 >
                                     {rate === 0 ? 'No tip' : `${rate}%`}
@@ -184,7 +229,7 @@ function TaxCalculator({ province }: Props) {
                             ))}
                         </div>
                         <p className="tip-hint mb-0">
-                            Tip is calculated on the pre-tax amount.
+                            Tip is calculated from the total amount for the selected calculation.
                         </p>
                     </fieldset>
                 </form>
@@ -196,15 +241,17 @@ function TaxCalculator({ province }: Props) {
                                 <p className="eyebrow mb-1">YOUR BREAKDOWN</p>
                                 <h3 className="calculator-result__title mb-0">Estimated amounts</h3>
                             </div>
-                            <div className="calculator-result__share">
-                                <span>Tax portion</span>
-                                <strong>{currentResult.taxShare.toFixed(2)}%</strong>
-                            </div>
+                            {currentResult.calculationMode !== null && (
+                                <div className="calculator-result__share">
+                                    <span>Tax portion</span>
+                                    <strong>{currentResult.taxShare.toFixed(2)}%</strong>
+                                </div>
+                            )}
                         </div>
 
                         <div className="calculator-result__rows">
                             <div className="calculator-result__row">
-                                <span>Before tax</span>
+                                <span>{currentResult.calculationMode === null ? 'Amount' : 'Before tax'}</span>
                                 <strong>{formatCurrency(currentResult.baseAmount)}</strong>
                             </div>
                             {taxRows.map((tax) => (
@@ -214,8 +261,20 @@ function TaxCalculator({ province }: Props) {
                                 </div>
                             ))}
                             <div className="calculator-result__row calculator-result__row--total">
-                                <span>Subtotal including tax</span>
-                                <strong>{formatCurrency(currentResult.totalAmount)}</strong>
+                                <span>
+                                    {currentResult.calculationMode === null
+                                        ? 'Amount before tip'
+                                        : currentResult.calculationMode === 'deduct'
+                                            ? `${currentResult.tipRate > 0 ? 'Subtotal' : 'Total'} excluding tax`
+                                            : `${currentResult.tipRate > 0 ? 'Subtotal' : 'Total'} including tax`}
+                                </span>
+                                <strong>
+                                    {formatCurrency(
+                                        currentResult.calculationMode === 'deduct'
+                                            ? currentResult.baseAmount
+                                            : currentResult.totalAmount,
+                                    )}
+                                </strong>
                             </div>
                             {currentResult.tipRate > 0 && (
                                 <>
@@ -224,16 +283,22 @@ function TaxCalculator({ province }: Props) {
                                         <strong>{formatCurrency(currentResult.tipAmount)}</strong>
                                     </div>
                                     <div className="calculator-result__row calculator-result__row--grand-total">
-                                        <span>Total including tax and tip</span>
+                                        <span>
+                                            {currentResult.calculationMode === null
+                                                ? 'Total including tip'
+                                                : 'Total including tax and tip'}
+                                        </span>
                                         <strong>{formatCurrency(currentResult.amountDue)}</strong>
                                     </div>
                                 </>
                             )}
                         </div>
-                        <p className="calculator-result__note mb-0">
-                            Applicable taxes total {formatCurrency(currentResult.taxAmount)}.
-                            {currentResult.taxShare > 0 && <> They make up {currentResult.taxShare.toFixed(2)}% of the tax-included total.</>}
-                        </p>
+                        {currentResult.calculationMode !== null && (
+                            <p className="calculator-result__note mb-0">
+                                Applicable taxes total {formatCurrency(currentResult.taxAmount)}.
+                                {currentResult.taxShare > 0 && <> They make up {currentResult.taxShare.toFixed(2)}% of the tax-included total.</>}
+                            </p>
+                        )}
                     </div>
                 )}
             </div>
