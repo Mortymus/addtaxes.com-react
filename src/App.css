@@ -344,6 +344,24 @@
   font-size: 11px;
 }
 
+.calculator-input .calculator-clear {
+  padding-inline: 12px;
+  color: #52766d;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.calculator-input .calculator-clear:hover:not(:disabled),
+.calculator-input .calculator-clear:focus-visible {
+  background: #edf6f1;
+  color: #225a4d;
+}
+
+.calculator-input .calculator-clear:disabled {
+  color: #a6b3af;
+  cursor: default;
+}
+
 .calculator-input .form-control:focus {
   border-color: #72a994;
   box-shadow: 0 0 0 3px rgba(74, 146, 119, 0.13);
@@ -431,16 +449,16 @@
 }
 
 .calculator-button--primary {
-  border: 1px solid #17634e;
-  background: #17634e;
-  color: #fff;
+  border: 1px solid #d8e3df;
+  background: #fff;
+  color: #315b55;
 }
 
 .calculator-button--primary:hover,
 .calculator-button--primary:focus-visible {
-  border-color: #104e3d;
-  background: #104e3d;
-  color: #fff;
+  border-color: #9bbdaf;
+  background: #f5faf7;
+  color: #225a4d;
 }
 
 .calculator-button--secondary {
@@ -454,6 +472,15 @@
   border-color: #9bbdaf;
   background: #f5faf7;
   color: #225a4d;
+}
+
+.calculator-button--selected,
+.calculator-button--selected:hover,
+.calculator-button--selected:focus-visible {
+  border-color: #17634e;
+  background: #edf6f1;
+  color: #17634e;
+  box-shadow: 0 0 0 2px rgba(23, 99, 78, 0.08);
 }
 
 .calculator-result {
@@ -696,5 +723,179 @@
 @media (max-width: 767.98px) {
   .calculator-actions {
     margin-top: 12px;
+  }
+}
+
+@media (max-width: 575.98px) {
+  .app-navbar {
+    min-height: 52px;
+    padding-block: 4px;
+  }
+
+  .app-navbar .navbar-brand {
+    gap: 8px !important;
+    padding-block: 0;
+  }
+
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+    border-radius: 9px;
+    font-size: 22px;
+  }
+
+  .brand-name {
+    font-size: 16px;
+  }
+
+  .app-main {
+    padding: 18px 14px 0;
+  }
+
+  .hero-section {
+    margin-bottom: 14px;
+  }
+
+  .hero-section > .col-lg-4,
+  .hero-section .eyebrow,
+  .hero-copy {
+    display: none;
+  }
+
+  .hero-title {
+    margin-bottom: 0 !important;
+    font-size: 22px;
+    letter-spacing: -0.9px;
+    line-height: 1.15;
+  }
+
+  .hero-title-accent {
+    display: inline !important;
+  }
+
+  .rate-card {
+    border-radius: 15px;
+  }
+
+  .rate-card .card-body {
+    padding: 13px !important;
+  }
+
+  .rate-card .card-body > .d-flex {
+    gap: 8px !important;
+  }
+
+  .rate-card .card-body > .d-flex > div:first-child,
+  .rate-card-divider,
+  .rate-card .row,
+  .picker-label,
+  .rate-card-footer {
+    display: none;
+  }
+
+  .region-picker {
+    width: 100%;
+  }
+
+  .picker-label {
+    margin-bottom: 5px;
+    font-size: 11px;
+  }
+
+  .province-dropdown__trigger {
+    padding: 8px 11px;
+  }
+
+  .province-dropdown__trigger .tax-badge {
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  .calculator-card {
+    margin-top: 12px;
+    border-radius: 15px;
+  }
+
+  .calculator-card .card-body {
+    padding: 16px !important;
+  }
+
+  .calculator-heading .eyebrow {
+    display: none;
+  }
+
+  .calculator-heading .section-title {
+    margin-bottom: 3px !important;
+    font-size: 20px;
+  }
+
+  .calculator-description {
+    font-size: 11px;
+  }
+
+  .calculator-form {
+    margin-top: 13px;
+  }
+
+  .calculator-input .form-control,
+  .calculator-input .input-group-text {
+    min-height: 42px;
+  }
+
+  .calculator-hint,
+  .calculator-error {
+    margin-top: 5px;
+    font-size: 10px;
+  }
+
+  .calculator-actions {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 6px;
+    margin-top: 9px;
+  }
+
+  .calculator-button {
+    min-height: 44px;
+    padding: 6px 4px;
+    font-size: 10px;
+    line-height: 1.2;
+  }
+
+  .tip-selector {
+    margin-top: 12px;
+  }
+
+  .tip-selector legend {
+    margin-bottom: 5px;
+  }
+
+  .tip-options {
+    gap: 5px;
+  }
+
+  .tip-option {
+    min-width: 0;
+    padding: 6px 8px;
+    font-size: 11px;
+  }
+
+  .tip-hint {
+    margin-top: 5px;
+    font-size: 10px;
+  }
+
+  .calculator-result {
+    margin-top: 12px;
+    padding: 10px;
+  }
+
+  .calculator-result__row {
+    padding-block: 5px;
+  }
+
+  .calculator-result__row--total,
+  .calculator-result__row--grand-total {
+    padding-top: 8px;
   }
 }

@@ -34,11 +34,11 @@ function App() {
           <div className="col-lg-8">
             <p className="eyebrow mb-3">CLEAR RATES. CONFIDENT DECISIONS.</p>
             <h1 className="hero-title mb-3">
-              Canadian sales tax calculator,
+              Canadian sales tax,
               <span className="d-block hero-title-accent">without the guesswork.</span>
             </h1>
             <p className="hero-copy mb-0">
-              Look up GST, PST and HST by province, calculate tax on an amount, or estimate a tip.
+              Look up GST, PST and HST by province or territory, calculate taxes or tips for any amount.
             </p>
           </div>
           <div className="col-lg-4">
